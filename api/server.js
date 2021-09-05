@@ -1,7 +1,11 @@
-const express = require("express");
+const express = require('express')
+const helmet = require('helmet')
+const accountsRouter = require('./accounts/accounts-router')
+const logger = require('./middleware')
+const server = express()
 
-const server = express();
+server.use(express.json())
+server.use(helmet())
+server.use('/api/accounts',logger, accountsRouter)
 
-server.use(express.json());
-
-module.exports = server;
+module.exports = server
