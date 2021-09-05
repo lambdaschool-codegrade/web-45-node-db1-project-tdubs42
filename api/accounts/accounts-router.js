@@ -9,7 +9,7 @@ router.get('/', (req, res, next) => {
 })
 
 router.get('/:id', checkAccountId, (req, res, next) => {
-  res.json(req.account)
+  res.json(req.found)
 })
 
 router.post('/', checkAccountPayload, checkAccountNameUnique, (req, res, next) => {
@@ -18,16 +18,16 @@ router.post('/', checkAccountPayload, checkAccountNameUnique, (req, res, next) =
     .catch(next)
 })
 
-router.put('/:id', checkAccountPayload, checkAccountNameUnique, (req, res, next) => {
-  const {id} = req.params
+router.put('/:id', checkAccountPayload, checkAccountId, (req, res, next) => {
+  const {id} = req.found
   const changes = req.account
   Account.updateById(id, changes)
-    .then(updated => res.json(updated))
+    .then(account => res.json(account))
     .catch(next)
 })
 
 router.delete('/:id', checkAccountId, (req, res, next) => {
-  Account.deleteById(req.params.id)
+  Account.deleteById(req.found.id)
     .then(deleted => res.json(deleted))
     .catch(next)
 })

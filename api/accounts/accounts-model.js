@@ -1,33 +1,33 @@
 const db = require('../../data/db-config')
 
-const getAll = () => {
+const getAll = async () => {
   return db('accounts')
 }
 
-const getById = id => {
+const getById = async id => {
   return db('accounts')
     .where({id})
     .first()
 }
 
-const create = account => {
+const create = async account => {
   return db('accounts')
     .insert(account)
-    .then(id => getById(id))
+    .then(id => getById(id[0]))
 }
 
-const updateById = (id, account) => {
-  return db('accounts')
+const updateById = async (id, account) => {
+  await db('accounts')
     .where({id})
     .update(account)
-    .then(id => getById(id))
+  return getById(id)
 }
 
-const deleteById = id => {
+const deleteById = async id => {
   const deleted = getById(id)
-  db('accounts')
+  await db('accounts')
     .where({id})
-    .del()
+    .delete()
   return deleted
 }
 

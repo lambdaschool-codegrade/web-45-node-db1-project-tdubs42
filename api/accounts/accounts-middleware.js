@@ -3,7 +3,10 @@ const db = require('../../data/db-config')
 
 exports.checkAccountPayload = (req, res, next) => {
   const {name, budget} = req.body
-  if (!name || budget === undefined) {
+  if (budget === undefined) {
+    next({message: 'name and budget are required', status: 400})
+  }
+  if (!name) {
     next({message: 'name and budget are required', status: 400})
   }
   if (typeof name !== 'string') {
@@ -16,21 +19,26 @@ exports.checkAccountPayload = (req, res, next) => {
     next({message: 'budget of account must be a number', status: 400})
   }
   if (budget < 0 || budget > 1000000) {
-    next({message: 'budget of account is too large or too small'})
+    next({message: 'budget of account is too large or too small', status: 400})
   }
-  req.account = req.body
+  req.account = {
+    name: name.trim(),
+    budget: budget
+  }
   next()
 }
 
-exports.checkAccountNameUnique = (req, res, next) => {
+exports.checkAccountNameUnique = async (req, res, next) => {
   const {name} = req.account
-  const available = db('accounts')
+  await db('accounts')
     .where('name', name.trim())
     .first()
-  if (!available) {
-    next({message: 'that name is taken'})
-  }
-  next()
+    .then(taken => {
+      if (taken) {
+        next({message: 'that name is taken', status: 400})
+      }
+      next()
+    })
 }
 
 exports.checkAccountId = (req, res, next) => {
@@ -39,7 +47,7 @@ exports.checkAccountId = (req, res, next) => {
       if (!account) {
         next({message: 'account not found', status: 404})
       }
-      req.account = account
+      req.found = account
       next()
     })
     .catch(next)
